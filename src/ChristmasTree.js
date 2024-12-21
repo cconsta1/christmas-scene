@@ -14,6 +14,7 @@ class ChristmasTree {
         this.tree = null;
         this.onTreeClick = onTreeClick;
         this.isAnimating = false;
+        this.isLit = false;
 
         const gltfLoader = new GLTFLoader();
 
@@ -38,6 +39,13 @@ class ChristmasTree {
                     this.action = this.mixer.clipAction(gltf.animations[0]);
                     this.action.paused = true; // Start with the animation paused
                 }
+
+                // Log all meshes
+                this.tree.traverse((child) => {
+                    if (child.isMesh) {
+                        console.log(`Mesh: ${child.name}`, child);
+                    }
+                });
 
                 // Add event listener for clicks
                 this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
@@ -83,6 +91,16 @@ class ChristmasTree {
         if (intersects.length > 0) {
             this.onTreeClick();
         }
+    }
+
+    toggleLights() {
+        this.isLit = !this.isLit;
+        this.tree.traverse((child) => {
+            if (child.isMesh && child.material.emissive) {
+                child.material.emissive.setHex(this.isLit ? 0xffd700 : 0x000000); // Toggle emissive color
+                child.material.emissiveIntensity = this.isLit ? 1 : 0; // Toggle emissive intensity
+            }
+        });
     }
 
     toggleAnimation() {

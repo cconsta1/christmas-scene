@@ -52,6 +52,8 @@ class App {
         this.clock = new THREE.Clock();
         this.previousTime = 0;
 
+        this.renderer.domElement.addEventListener('click', this.onTrainClick.bind(this));
+
         this.animate();
     }
 
@@ -72,7 +74,7 @@ class App {
     }
 
     initControls() {
-        this.controls = new OrbitControls(this.camera, this.canvas);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0.75, 0);
         this.controls.enableDamping = true;
         this.controls.minDistance = 1; // Prevent zooming all the way in
@@ -107,10 +109,27 @@ class App {
     }
 
     onTreeClick() {
-        this.train.toggleAnimation();
+        this.christmasTree.toggleLights();
         this.christmasTree.toggleAnimation();
-        if (this.sound && !this.sound.isPlaying) {
+        if (this.sound.isPlaying) {
+            this.sound.pause();
+        } else {
             this.sound.play();
+        }
+    }
+
+    onTrainClick(event) {
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, this.camera);
+
+        const intersects = raycaster.intersectObject(this.train.train, true);
+        if (intersects.length > 0) {
+            this.train.toggleAnimation();
+            this.train.toggleLights();
         }
     }
 

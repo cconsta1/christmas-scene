@@ -10,7 +10,7 @@ body {
     height: 100%;
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: #000; /* Set background to black to avoid blue screen */
     display: flex;
     justify-content: center;
     align-items: center;
