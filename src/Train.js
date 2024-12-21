@@ -28,7 +28,7 @@ class Train {
                 // Log the train components
                 this.train.traverse((child) => {
                     if (child.isMesh) {
-                        console.log(`Mesh: ${child.name}`, child)
+                        // console.log(`Mesh: ${child.name}`, child)
 
                         // Adjust material properties to make it brighter and shinier
                         // child.material.emissive = new THREE.Color(0x444444); // Add some emissive color
