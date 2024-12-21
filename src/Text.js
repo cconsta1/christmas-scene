@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
+import { ShaderMaterial } from 'three'
+import { TextShader } from './TextShader.js'
 
 class Text {
     constructor(scene) {
@@ -13,7 +15,7 @@ class Text {
             const textGeometry = new TextGeometry('Merry Christmas', {
                 font: font,
                 size: 0.5,
-                height: 0.2,
+                depth: 0.2, // Use .depth instead of .height
                 curveSegments: 12,
                 bevelEnabled: true,
                 bevelThickness: 0.03,
@@ -25,13 +27,12 @@ class Text {
             // Center the text
             textGeometry.center()
 
-            // Load the matcap texture
-            const textureLoader = new THREE.TextureLoader()
-            const matcapTexture = textureLoader.load('/textures/matcaps/045C5C_0DBDBD_049393_04A4A4.png')
-            matcapTexture.colorSpace = THREE.SRGBColorSpace
-
-            // Create the material
-            const textMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
+            // Create the material using the TextShader
+            const textMaterial = new ShaderMaterial({
+                vertexShader: TextShader.vertexShader,
+                fragmentShader: TextShader.fragmentShader,
+                uniforms: THREE.UniformsUtils.clone(TextShader.uniforms)
+            })
 
             // Create the mesh
             const textMesh = new THREE.Mesh(textGeometry, textMaterial)

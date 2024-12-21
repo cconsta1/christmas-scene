@@ -1,30 +1,23 @@
 import * as THREE from 'three'
+import { ShaderMaterial } from 'three'
+import { SnowShader } from './SnowShader.js'
 
 class Floor {
     constructor(scene) {
-        const textureLoader = new THREE.TextureLoader()
+        // Create the box geometry for the platform with a thinner height
+        const floorGeometry = new THREE.BoxGeometry(10, 0.2, 10)
 
-        const diffuseTexture = textureLoader.load('/textures/Snow_003_SD/Snow_003_COLOR.jpg')
-        const normalTexture = textureLoader.load('/textures/Snow_003_SD/Snow_003_NORM.jpg')
-        const displacementTexture = textureLoader.load('/textures/Snow_003_SD/Snow_003_DISP.png')
-        const roughnessTexture = textureLoader.load('/textures/Snow_003_SD/Snow_003_ROUGH.jpg')
-        const aoTexture = textureLoader.load('/textures/Snow_003_SD/Snow_003_OCC.jpg')
+        // Create the material using the SnowShader
+        const floorMaterial = new ShaderMaterial({
+            vertexShader: SnowShader.vertexShader,
+            fragmentShader: SnowShader.fragmentShader,
+            uniforms: THREE.UniformsUtils.clone(SnowShader.uniforms)
+        })
 
-        const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(10, 10, 100, 100), // Increased segments for better displacement
-            new THREE.MeshStandardMaterial({
-                map: diffuseTexture,
-                normalMap: normalTexture,
-                displacementMap: displacementTexture,
-                displacementScale: 0.001, // Adjust the scale as needed
-                roughnessMap: roughnessTexture,
-                aoMap: aoTexture,
-                metalness: 0,
-                roughness: 1
-            })
-        )
+        // Create the mesh
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial)
         floor.receiveShadow = true
-        floor.rotation.x = -Math.PI * 0.5
+        floor.position.y = -0.1 // Adjust the position to make it look like a platform
         scene.add(floor)
     }
 }

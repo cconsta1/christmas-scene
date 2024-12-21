@@ -25,6 +25,19 @@ class Train {
 
                 this.train = gltf.scene
 
+                // Log the train components
+                this.train.traverse((child) => {
+                    if (child.isMesh) {
+                        console.log(`Mesh: ${child.name}`, child)
+
+                        // Adjust material properties to make it brighter and shinier
+                        // child.material.emissive = new THREE.Color(0x444444); // Add some emissive color
+                        child.material.emissiveIntensity = 0.; // Adjust emissive intensity
+                        child.material.metalness = 0.9; // Increase metalness for shininess
+                        child.material.roughness = 0.; // Decrease roughness for shininess
+                    }
+                })
+
                 this.mixer = new THREE.AnimationMixer(gltf.scene)
                 if (gltf.animations.length > 0) {
                     const action = this.mixer.clipAction(gltf.animations[0])

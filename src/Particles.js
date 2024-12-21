@@ -1,81 +1,48 @@
 import * as THREE from 'three'
+import { ShaderMaterial } from 'three'
+import { SnowParticleShader } from './SnowParticleShader.js'
 
 class Particles {
     constructor(scene) {
-        const particleCount = 50000 // Half the total particle count for each type
+        const particleCount = 50000
 
-        // Create geometry and positions for the first particle system
-        const particles1 = new THREE.BufferGeometry()
-        const particlePositions1 = new Float32Array(particleCount * 3)
+        // Create geometry and positions for the particle system
+        const particles = new THREE.BufferGeometry()
+        const particlePositions = new Float32Array(particleCount * 3)
         for (let i = 0; i < particleCount; i++) {
-            particlePositions1[i * 3] = (Math.random() - 0.5) * 20
-            particlePositions1[i * 3 + 1] = Math.random() * 20
-            particlePositions1[i * 3 + 2] = (Math.random() - 0.5) * 20
+            particlePositions[i * 3] = (Math.random() - 0.5) * 20
+            particlePositions[i * 3 + 1] = Math.random() * 20
+            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 20
         }
-        particles1.setAttribute('position', new THREE.BufferAttribute(particlePositions1, 3))
+        particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
 
-        // Create geometry and positions for the second particle system
-        const particles2 = new THREE.BufferGeometry()
-        const particlePositions2 = new Float32Array(particleCount * 3)
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions2[i * 3] = (Math.random() - 0.5) * 20
-            particlePositions2[i * 3 + 1] = Math.random() * 20
-            particlePositions2[i * 3 + 2] = (Math.random() - 0.5) * 20
-        }
-        particles2.setAttribute('position', new THREE.BufferAttribute(particlePositions2, 3))
-
-        const textureLoader = new THREE.TextureLoader()
-        const snowflakeTexture1 = textureLoader.load('/sprites/snowflake1.png')
-        const snowflakeTexture2 = textureLoader.load('/sprites/snowflake2.png')
-
-        const particleMaterial1 = new THREE.PointsMaterial({
-            map: snowflakeTexture1,
+        // Create the material using the SnowParticleShader
+        const particleMaterial = new ShaderMaterial({
+            vertexShader: SnowParticleShader.vertexShader,
+            fragmentShader: SnowParticleShader.fragmentShader,
+            uniforms: {
+                color: { value: new THREE.Color(0xffffff) },
+                size: { value: 0.1 },
+                scale: { value: window.innerHeight / 2 }
+            },
             transparent: true,
-            alphaTest: 0.5,
-            size: 0.1, // Increase the size of the particles
-            sizeAttenuation: true,
-            color: new THREE.Color(0xffffff), // Set the color to white
-            opacity: 0.8, // Adjust the opacity for a shinier effect
-            blending: THREE.AdditiveBlending, // Use additive blending for a shiny effect
-            depthWrite: false // Disable depth write for better blending
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
         })
 
-        const particleMaterial2 = new THREE.PointsMaterial({
-            map: snowflakeTexture2,
-            transparent: true,
-            alphaTest: 0.5,
-            size: 0.2, // Increase the size of the particles
-            sizeAttenuation: true,
-            color: new THREE.Color(0xadd8e6), // Light blue color
-            opacity: 0.8, // Adjust the opacity for a shinier effect
-            blending: THREE.AdditiveBlending, // Use additive blending for a shiny effect
-            depthWrite: false // Disable depth write for better blending
-        })
-
-        this.particleSystem1 = new THREE.Points(particles1, particleMaterial1)
-        this.particleSystem2 = new THREE.Points(particles2, particleMaterial2)
-        scene.add(this.particleSystem1)
-        scene.add(this.particleSystem2)
+        this.particleSystem = new THREE.Points(particles, particleMaterial)
+        scene.add(this.particleSystem)
     }
 
     update(deltaTime) {
-        const positions1 = this.particleSystem1.geometry.attributes.position.array
-        for (let i = 0; i < positions1.length / 3; i++) {
-            positions1[i * 3 + 1] -= deltaTime * 0.5
-            if (positions1[i * 3 + 1] < 0) {
-                positions1[i * 3 + 1] = 20
+        const positions = this.particleSystem.geometry.attributes.position.array
+        for (let i = 0; i < positions.length / 3; i++) {
+            positions[i * 3 + 1] -= deltaTime * 0.5
+            if (positions[i * 3 + 1] < 0) {
+                positions[i * 3 + 1] = 20
             }
         }
-        this.particleSystem1.geometry.attributes.position.needsUpdate = true
-
-        const positions2 = this.particleSystem2.geometry.attributes.position.array
-        for (let i = 0; i < positions2.length / 3; i++) {
-            positions2[i * 3 + 1] -= deltaTime * 0.5
-            if (positions2[i * 3 + 1] < 0) {
-                positions2[i * 3 + 1] = 20
-            }
-        }
-        this.particleSystem2.geometry.attributes.position.needsUpdate = true
+        this.particleSystem.geometry.attributes.position.needsUpdate = true
     }
 }
 

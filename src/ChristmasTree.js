@@ -1,5 +1,8 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { ShaderMaterial } from 'three'
+import { GhibliShader } from './GhibliShader.js'
+import { createToonShader } from './ToonShader.js'
 
 class ChristmasTree {
     constructor(scene, camera, renderer, onTreeClick) {
@@ -22,6 +25,9 @@ class ChristmasTree {
 
                 this.tree = gltf.scene
 
+                // Apply custom shaders
+                this.applyShaders(this.tree)
+
                 // Animation
                 this.mixer = new THREE.AnimationMixer(gltf.scene)
                 if (gltf.animations.length > 0) {
@@ -33,6 +39,32 @@ class ChristmasTree {
                 this.renderer.domElement.addEventListener('click', this.onClick.bind(this))
             }
         )
+    }
+
+    applyShaders(object) {
+        const treeShaderMaterial = new ShaderMaterial({
+            vertexShader: GhibliShader.vertexShader,
+            fragmentShader: GhibliShader.fragmentShader,
+            uniforms: THREE.UniformsUtils.clone(GhibliShader.uniforms)
+        });
+
+        object.traverse((child) => {
+            if (child.isMesh) {
+                if (child.name === 'model_default_0') {
+                    // Apply GhibliShader to the tree
+                    child.material = treeShaderMaterial;
+                } else if (child.name.startsWith('Sphere')) {
+                    // Apply a new ToonShader to each decoration
+                    const toonShader = createToonShader();
+                    const decorationShaderMaterial = new ShaderMaterial({
+                        vertexShader: toonShader.vertexShader,
+                        fragmentShader: toonShader.fragmentShader,
+                        uniforms: THREE.UniformsUtils.clone(toonShader.uniforms)
+                    });
+                    child.material = decorationShaderMaterial;
+                }
+            }
+        });
     }
 
     onClick(event) {

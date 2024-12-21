@@ -8,6 +8,7 @@ import Particles from './Particles.js'
 import ChristmasTree from './ChristmasTree.js'
 import Text from './Text.js'
 import AnimatedLights from './AnimatedLights.js'
+import Skybox from './Skybox.js'
 
 class App {
     constructor() {
@@ -29,6 +30,7 @@ class App {
         this.initControls()
         this.initEventListeners()
 
+        this.skybox = new Skybox(this.scene)
         this.train = new Train(this.scene)
         this.floor = new Floor(this.scene)
         this.lights = new Lights(this.scene)
