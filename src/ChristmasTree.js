@@ -6,51 +6,65 @@ import { createToonShader } from './ToonShader.js';
 import Star from './Star.js';
 
 class ChristmasTree {
-    constructor(scene, camera, renderer, onTreeClick) {
+    constructor(scene, camera, renderer) {
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
         this.mixer = null;
         this.tree = null;
-        this.onTreeClick = onTreeClick;
         this.isAnimating = false;
-        this.isLit = false;
 
-        const gltfLoader = new GLTFLoader();
+        this.initAudio();
+    }
 
-        gltfLoader.load(
-            '/models/christmas-tree/christmas_tree_2.glb',
-            (gltf) => {
-                gltf.scene.scale.set(0.8, 0.8, 0.8); // Adjust the scale to make the tree taller
-                gltf.scene.position.set(0, 0, 0); // Position the tree in the middle of the floor
-                this.scene.add(gltf.scene);
+    load() {
+        return new Promise((resolve, reject) => {
+            const gltfLoader = new GLTFLoader();
 
-                this.tree = gltf.scene;
+            gltfLoader.load(
+                '/models/christmas-tree/christmas_tree_2.glb',
+                (gltf) => {
+                    gltf.scene.scale.set(0.8, 0.8, 0.8);
+                    gltf.scene.position.set(0, 0, 0);
+                    this.scene.add(gltf.scene);
 
-                // Apply custom shaders
-                this.applyShaders(this.tree);
+                    this.tree = gltf.scene;
 
-                // Add the star on top of the tree
-                this.star = new Star(this.scene, this.tree);
+                    this.applyShaders(this.tree);
 
-                // Animation
-                this.mixer = new THREE.AnimationMixer(gltf.scene);
-                if (gltf.animations.length > 0) {
-                    this.action = this.mixer.clipAction(gltf.animations[0]);
-                    this.action.paused = true; // Start with the animation paused
-                }
+                    this.star = new Star(this.scene, this.tree);
 
-                // Log all meshes
-                this.tree.traverse((child) => {
-                    if (child.isMesh) {
-                        console.log(`Mesh: ${child.name}`, child);
+                    this.mixer = new THREE.AnimationMixer(gltf.scene);
+                    if (gltf.animations.length > 0) {
+                        this.action = this.mixer.clipAction(gltf.animations[0]);
+                        this.action.paused = true;
                     }
-                });
 
-                // Add event listener for clicks
-                this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
-            }
-        );
+                    this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
+
+                    // Resolve the promise after the tree model is loaded
+                    resolve();
+                },
+                undefined,
+                (error) => {
+                    console.error('An error happened while loading the Christmas tree model:', error);
+                    reject(error);
+                }
+            );
+        });
+    }
+
+    initAudio() {
+        const listener = new THREE.AudioListener();
+        this.camera.add(listener);
+
+        this.sound = new THREE.Audio(listener);
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('audio/The_Waitresses_Christmas_Wrapping.mp3', (buffer) => {
+            this.sound.setBuffer(buffer);
+            this.sound.setLoop(true);
+            this.sound.setVolume(0.5);
+        });
     }
 
     applyShaders(object) {
@@ -63,10 +77,8 @@ class ChristmasTree {
         object.traverse((child) => {
             if (child.isMesh) {
                 if (child.name === 'model_default_0') {
-                    // Apply GhibliShader to the tree
                     child.material = treeShaderMaterial;
                 } else if (child.name.startsWith('Sphere')) {
-                    // Apply a new ToonShader to each decoration
                     const toonShader = createToonShader();
                     const decorationShaderMaterial = new ShaderMaterial({
                         vertexShader: toonShader.vertexShader,
@@ -89,18 +101,13 @@ class ChristmasTree {
 
         const intersects = raycaster.intersectObject(this.tree, true);
         if (intersects.length > 0) {
-            this.onTreeClick();
-        }
-    }
-
-    toggleLights() {
-        this.isLit = !this.isLit;
-        this.tree.traverse((child) => {
-            if (child.isMesh && child.material.emissive) {
-                child.material.emissive.setHex(this.isLit ? 0xffd700 : 0x000000); // Toggle emissive color
-                child.material.emissiveIntensity = this.isLit ? 1 : 0; // Toggle emissive intensity
+            this.toggleAnimation();
+            if (this.sound.isPlaying) {
+                this.sound.pause();
+            } else {
+                this.sound.play();
             }
-        });
+        }
     }
 
     toggleAnimation() {

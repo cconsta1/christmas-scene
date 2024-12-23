@@ -45,13 +45,111 @@ npm run build
 - **Toggle Animation**: Click on the Christmas tree to toggle the train and tree animations.
 - **Audio**: The scene includes background music that plays when the tree is clicked.
 
+## Using `script.js` Without a Loading Screen
+
+If you want to use the spaghetti code in `script.js` without a loading screen, follow these steps:
+
+1. **Comment Out the Loading Screen HTML**: Open `index.html` and comment out the section marked as `<!-- Loading screen start -->` to `<!-- Loading screen end -->`.
+2. **Replace `main.js` with `script.js`**: In `index.html`, replace the script reference to `main.js` with `script.js`.
+
+### Example:
+#### `index.html`
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❄️ 3D Christmas ⛄</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- Remove or comment out the loading screen -->
+    <!-- <div id="loading-screen">
+        <div class="scene">
+            <div class="word">
+                <div class="letter__wrap" style="--index: 0;">
+                    <div class="letter">
+                        <div class="letter__panel">L</div>
+                        <div class="letter__panel">L</div>
+                        <div class="letter__panel">L</div>
+                        <div class="letter__panel">L</div>
+                        <div class="letter__panel">L</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 1;">
+                    <div class="letter">
+                        <div class="letter__panel">O</div>
+                        <div class="letter__panel">O</div>
+                        <div class="letter__panel">O</div>
+                        <div class="letter__panel">O</div>
+                        <div class="letter__panel">O</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 2;">
+                    <div class="letter">
+                        <div class="letter__panel">A</div>
+                        <div class="letter__panel">A</div>
+                        <div class="letter__panel">A</div>
+                        <div class="letter__panel">A</div>
+                        <div class="letter__panel">A</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 3;">
+                    <div class="letter">
+                        <div class="letter__panel">D</div>
+                        <div class="letter__panel">D</div>
+                        <div class="letter__panel">D</div>
+                        <div class="letter__panel">D</div>
+                        <div class="letter__panel">D</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 4;">
+                    <div class="letter">
+                        <div class="letter__panel">I</div>
+                        <div class="letter__panel">I</div>
+                        <div class="letter__panel">I</div>
+                        <div class="letter__panel">I</div>
+                        <div class="letter__panel">I</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 5;">
+                    <div class="letter">
+                        <div class="letter__panel">N</div>
+                        <div class="letter__panel">N</div>
+                        <div class="letter__panel">N</div>
+                        <div class="letter__panel">N</div>
+                        <div class="letter__panel">N</div>
+                    </div>
+                </div>
+                <div class="letter__wrap" style="--index: 6;">
+                    <div class="letter">
+                        <div class="letter__panel">G</div>
+                        <div class="letter__panel">G</div>
+                        <div class="letter__panel">G</div>
+                        <div class="letter__panel">G</div>
+                        <div class="letter__panel">G</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <canvas class="webgl"></canvas>
+    <script type="module" src="./script.js"></script>
+</body>
+
+</html>
+```
+
 ## File Structure
 - **src/**
   - **App.js**: Main application file that initializes the scene, camera, renderer, and controls.
   - **main.js**: Entry point of the application. It creates an instance of the `App` class.
   - **index.html**: HTML file that includes the canvas element for rendering the scene.
   - **style.css**: CSS file for styling the HTML elements.
-  - **script.js**: Additional JavaScript file for any custom scripts.
+  - **script.js**: Additional JavaScript file for any custom scripts. This is a quick stripped version of the project used for experimentation (basically it's spaghetti code).
   - **Train.js**: Class for loading and animating the train model.
   - **Floor.js**: Class for creating the floor platform with a snow shader.
   - **Lights.js**: Class for adding lights to the scene.
@@ -93,5 +191,21 @@ const app = new App();
 - **ToonShader.js**: Defines the shader for cartoon-like effects.
 - **TextShader.js**: Defines the shader for the festive text.
 
-## Summary
-This `README.md` provides a comprehensive overview of the project, including its features, setup instructions, usage, file structure, entry point, and details about the classes and shaders used. This will help users understand the features of the project and how to set it up. If you encounter any issues or need further assistance, please let me know!
+
+## Acknowledgments
+
+### Snowflake Icon
+- **Source**: [Osckar on Pixabay](https://creazilla.com/)
+- **Published by**: Creazilla
+- **License**: Public Domain (CC0). Free for editorial, educational, commercial, and/or personal projects. No attribution required. More info.
+
+### Model Attributions
+- **Train Model**: [Source and License Information]
+- **Christmas Tree Model**: [Source and License Information]
+- **Other Models**: [Source and License Information]
+
+### Flippy Loader
+- **Author**: [Jhey Tompkins](https://github.com/jh3y)
+- **Demo and Code**: [Flippy Loader](https://codepen.io/jh3y/pen/VwLQZOY)
+- **Made with**: HTML (Pug) / CSS (Stylus)
+- **License**: MIT License

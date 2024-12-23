@@ -2,62 +2,119 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
+const FestiveShader = {
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        varying vec2 vUv;
+        void main() {
+            vec3 color = vec3(0.545, 0.0, 0.0); // Dark Red base color
+            if (mod(floor(vUv.x * 20.0), 2.0) == 0.0) {
+                color = vec3(1.0, 1.0, 1.0); // Thin White stripes
+            }
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `
+};
+
 class Train {
     constructor(scene) {
         this.scene = scene;
         this.mixer = null;
         this.train = null;
         this.radius = 4;
-        this.isAnimating = false;
+        this.isAnimating = false; // Set to false to start static
         this.isLit = false;
         this.elapsedTime = 0;
+        this.originalMaterials = [];
+    }
 
-        const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('/draco/');
+    load() {
+        return new Promise((resolve, reject) => {
+            const dracoLoader = new DRACOLoader();
+            dracoLoader.setDecoderPath('/draco/');
 
-        const gltfLoader = new GLTFLoader();
-        gltfLoader.setDRACOLoader(dracoLoader);
+            const gltfLoader = new GLTFLoader();
+            gltfLoader.setDRACOLoader(dracoLoader);
 
-        gltfLoader.load(
-            '/models/train/back_to_the_future_train_-_steam_locomotive.glb',
-            (gltf) => {
-                gltf.scene.scale.set(0.5, 0.5, 0.5);
-                this.scene.add(gltf.scene);
+            gltfLoader.load(
+                '/models/train/back_to_the_future_train_-_steam_locomotive.glb',
+                (gltf) => {
+                    gltf.scene.scale.set(0.5, 0.5, 0.5);
+                    this.scene.add(gltf.scene);
 
-                this.train = gltf.scene;
+                    this.train = gltf.scene;
 
-                this.train.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material.emissiveIntensity = 0;
-                        child.material.metalness = 0.9;
-                        child.material.roughness = 0;
+                    this.train.traverse((child) => {
+                        if (child.isMesh) {
+                            this.originalMaterials.push(child.material); // Store original materials
+                            child.name = `train-${child.name}`; // Add prefix to mesh names
+                        }
+                    });
+
+                    this.mixer = new THREE.AnimationMixer(gltf.scene);
+                    if (gltf.animations.length > 0) {
+                        const filteredTracks = gltf.animations[0].tracks.filter(track => {
+                            const trackName = track.name.split('.')[0];
+                            return this.train.getObjectByName(trackName) !== undefined;
+                        });
+                        const filteredClip = new THREE.AnimationClip(gltf.animations[0].name, gltf.animations[0].duration, filteredTracks);
+                        this.action = this.mixer.clipAction(filteredClip);
+                        this.action.play();
+                        this.action.paused = true; // Pause the animation initially
                     }
-                });
 
-                this.mixer = new THREE.AnimationMixer(gltf.scene);
-                if (gltf.animations.length > 0) {
-                    const action = this.mixer.clipAction(gltf.animations[0]);
-                    action.play();
+                    const initialAngle = 0;
+                    this.train.position.x = this.radius * Math.cos(initialAngle);
+                    this.train.position.z = this.radius * Math.sin(initialAngle);
+                    this.train.rotation.y = -initialAngle - Math.PI / 2;
+
+                    console.log('Train loaded');
+                    resolve();
+                },
+                undefined,
+                (error) => {
+                    console.error('An error happened while loading the train model:', error);
+                    reject(error);
                 }
-
-                const initialAngle = 0;
-                this.train.position.x = this.radius * Math.cos(initialAngle);
-                this.train.position.z = this.radius * Math.sin(initialAngle);
-                this.train.rotation.y = -initialAngle - Math.PI / 2;
-            }
-        );
+            );
+        });
     }
 
     toggleAnimation() {
         this.isAnimating = !this.isAnimating;
+        console.log('Toggling animation:', this.isAnimating);
+        if (this.isAnimating) {
+            console.log('Playing animation');
+            this.action.paused = false;
+            this.action.play();
+        } else {
+            console.log('Pausing animation');
+            this.action.paused = true;
+        }
     }
 
     toggleLights() {
         this.isLit = !this.isLit;
+        console.log('Toggling lights:', this.isLit);
+        const festiveMaterial = new THREE.ShaderMaterial({
+            vertexShader: FestiveShader.vertexShader,
+            fragmentShader: FestiveShader.fragmentShader
+        });
+        let materialIndex = 0;
         this.train.traverse((child) => {
             if (child.isMesh) {
-                child.material.emissive.setHex(this.isLit ? 0x333333 : 0x000000); // Toggle emissive color to a subtle gray
-                child.material.emissiveIntensity = this.isLit ? 0.5 : 0; // Toggle emissive intensity to a lower value
+                if (this.isLit) {
+                    child.material = festiveMaterial; // Apply festive shader material
+                } else {
+                    child.material = this.originalMaterials[materialIndex]; // Revert to original material
+                    materialIndex++;
+                }
             }
         });
     }
@@ -73,9 +130,10 @@ class Train {
     }
 
     update(deltaTime) {
-        if (this.mixer && this.isAnimating) {
+        if (this.mixer) {
             this.mixer.update(deltaTime);
         }
+        this.move(deltaTime);
     }
 }
 

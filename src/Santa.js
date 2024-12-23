@@ -2,37 +2,51 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 class Santa {
-    constructor(scene, camera, renderer, labelRenderer) {
+    constructor(scene, camera, renderer) {
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
-        this.labelRenderer = labelRenderer;
         this.santa = null;
+        this.mixer = null;
+    }
 
-        const gltfLoader = new GLTFLoader();
+    load() {
+        return new Promise((resolve, reject) => {
+            const gltfLoader = new GLTFLoader();
 
-        gltfLoader.load(
-            '/models/santa/jolly_santa.glb',
-            (gltf) => {
-                gltf.scene.scale.set(15, 15, 15); // Adjust the scale as needed
+            gltfLoader.load(
+                '/models/santa/jolly_santa.glb',
+                (gltf) => {
+                    gltf.scene.scale.set(15, 15, 15); // Adjust the scale as needed
 
-                // Set position and rotation
-                gltf.scene.position.set(0, 0.1, 3); // Move Santa to the center and a bit to the front
-                gltf.scene.rotation.y = Math.random() * Math.PI * 2; // Random rotation
+                    // Set position and rotation
+                    gltf.scene.position.set(0, 0.1, 3); // Move Santa to the center and a bit to the front
+                    gltf.scene.rotation.y = Math.random() * Math.PI * 2; // Random rotation
 
-                this.scene.add(gltf.scene);
+                    this.scene.add(gltf.scene);
 
-                // Store the Santa model
-                this.santa = gltf.scene;
+                    // Store the Santa model
+                    this.santa = gltf.scene;
 
-                // Add event listener for clicks
-                this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
-            },
-            undefined,
-            (error) => {
-                console.error('An error happened while loading the Santa model:', error);
-            }
-        );
+                    // Animation
+                    this.mixer = new THREE.AnimationMixer(gltf.scene);
+                    if (gltf.animations.length > 0) {
+                        this.action = this.mixer.clipAction(gltf.animations[0]);
+                        this.action.play();
+                    }
+
+                    // Add event listener for clicks
+                    this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
+
+                    resolve();
+                },
+                undefined,
+                (error) => {
+                    console.error('An error happened while loading the Santa model:', error);
+                    reject(error);
+                }
+            );
+        });
     }
 
     onClick(event) {
@@ -70,7 +84,9 @@ class Santa {
     }
 
     update(deltaTime) {
-        // No need to update anything for the light up effect
+        if (this.mixer) {
+            this.mixer.update(deltaTime);
+        }
     }
 }
 
