@@ -17,11 +17,11 @@ class Santa {
             gltfLoader.load(
                 '/models/santa/jolly_santa.glb',
                 (gltf) => {
-                    gltf.scene.scale.set(15, 15, 15); // Adjust the scale as needed
+                    gltf.scene.scale.set(25, 25, 25); // Adjust the scale as needed
 
                     // Set position and rotation
-                    gltf.scene.position.set(0, 0.1, 3); // Move Santa to the center and a bit to the front
-                    gltf.scene.rotation.y = Math.random() * Math.PI * 2; // Random rotation
+                    gltf.scene.position.set(2.5, 0.1, 1.2); // Move Santa out of the way
+                    //gltf.scene.rotation.y = Math.random() * Math.PI * 2; // Random rotation
 
                     this.scene.add(gltf.scene);
 

@@ -2,22 +2,25 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
-const FestiveShader = {
+const FireShader = {
     vertexShader: `
-        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
-            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `,
     fragmentShader: `
-        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
-            vec3 color = vec3(0.545, 0.0, 0.0); // Dark Red base color
-            if (mod(floor(vUv.x * 20.0), 2.0) == 0.0) {
-                color = vec3(1.0, 1.0, 1.0); // Thin White stripes
-            }
-            gl_FragColor = vec4(color, 1.0);
+            float intensity = pow(1.55 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 10.0);
+            vec3 fireColor = vec3(1.0, 0.5, 0.0); // Fire color
+            vec3 glow = fireColor * intensity;
+            vec3 reflection = vec3(1.0) * pow(max(dot(reflect(normalize(vPosition), vNormal), vec3(0.0, 0.0, 1.0)), 0.0), 5.0);
+            gl_FragColor = vec4(glow + reflection, 1.0);
         }
     `
 };
@@ -27,7 +30,7 @@ class Train {
         this.scene = scene;
         this.mixer = null;
         this.train = null;
-        this.radius = 4;
+        this.radius = 3.8;
         this.isAnimating = false; // Set to false to start static
         this.isLit = false;
         this.elapsedTime = 0;
@@ -45,7 +48,7 @@ class Train {
             gltfLoader.load(
                 '/models/train/back_to_the_future_train_-_steam_locomotive.glb',
                 (gltf) => {
-                    gltf.scene.scale.set(0.5, 0.5, 0.5);
+                    gltf.scene.scale.set(0.3, 0.3, 0.3);
                     this.scene.add(gltf.scene);
 
                     this.train = gltf.scene;
@@ -73,6 +76,7 @@ class Train {
                     this.train.position.x = this.radius * Math.cos(initialAngle);
                     this.train.position.z = this.radius * Math.sin(initialAngle);
                     this.train.rotation.y = -initialAngle - Math.PI / 2;
+                    this.train.position.y = 0.01;
 
                     console.log('Train loaded');
                     resolve();
@@ -102,15 +106,15 @@ class Train {
     toggleLights() {
         this.isLit = !this.isLit;
         console.log('Toggling lights:', this.isLit);
-        const festiveMaterial = new THREE.ShaderMaterial({
-            vertexShader: FestiveShader.vertexShader,
-            fragmentShader: FestiveShader.fragmentShader
+        const fireMaterial = new THREE.ShaderMaterial({
+            vertexShader: FireShader.vertexShader,
+            fragmentShader: FireShader.fragmentShader
         });
         let materialIndex = 0;
         this.train.traverse((child) => {
             if (child.isMesh) {
                 if (this.isLit) {
-                    child.material = festiveMaterial; // Apply festive shader material
+                    child.material = fireMaterial; // Apply fire shader material
                 } else {
                     child.material = this.originalMaterials[materialIndex]; // Revert to original material
                     materialIndex++;
@@ -122,7 +126,7 @@ class Train {
     move(deltaTime) {
         if (this.train && this.isAnimating) {
             this.elapsedTime += deltaTime;
-            const angle = this.elapsedTime * 1.0;
+            const angle = this.elapsedTime * 0.60;
             this.train.position.x = this.radius * Math.cos(angle);
             this.train.position.z = this.radius * Math.sin(angle);
             this.train.rotation.y = -angle - Math.PI / 2;
@@ -134,6 +138,29 @@ class Train {
             this.mixer.update(deltaTime);
         }
         this.move(deltaTime);
+    }
+
+    onClick(event) {
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, this.scene.camera);
+
+        const intersects = raycaster.intersectObjects(this.train.children, true);
+
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.name === 'train-Object_28') {
+                console.log('Clicked on the train light');
+                object.material = new THREE.ShaderMaterial({
+                    vertexShader: FireShader.vertexShader,
+                    fragmentShader: FireShader.fragmentShader
+                }); // Apply fire shader material
+            }
+        }
     }
 }
 

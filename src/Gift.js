@@ -1,29 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-const GhibliShader = {
-    vertexShader: `
-        varying vec2 vUv;
-        void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-    `,
-    fragmentShader: `
-        uniform vec3 colorMap[2];
-        varying vec2 vUv;
-        void main() {
-            float pattern = step(0.3, mod(floor(vUv.x * 10.0) + floor(vUv.y * 10.0), 2.0));
-            vec3 color = mix(colorMap[0], colorMap[1], pattern);
-            float circle = smoothstep(0.3, 0.4, length(vUv - vec2(0.5)));
-            color = mix(color, vec3(1.0, 0.0, 0.0), circle);
-            gl_FragColor = vec4(color, 1.0);
-        }
-    `,
-    uniforms: {
-        colorMap: { value: [new THREE.Color("#006400"), new THREE.Color("#FFFFFF")] } // Deep green and white
-    }
-};
+import { createToonShader } from './ToonShader.js';
 
 class Gift {
     constructor(scene, camera, renderer) {
@@ -40,7 +17,7 @@ class Gift {
             const positions = [
                 { x: -2, z: 2 }, // Position 1: Behind the tree
                 { x: -2, z: -2 }, // Position 2: Behind the tree
-                { x: 2.5, z: -2.5 } // Position 3: In front of the tree
+                { x: 2, z: 2.2 } // Position 3: In front of the tree
             ];
 
             let loadedCount = 0;
@@ -49,7 +26,7 @@ class Gift {
                 gltfLoader.load(
                     '/models/gifts/simple_presents.glb',
                     (gltf) => {
-                        gltf.scene.scale.set(1.5, 1.5, 1.5); // Adjust the scale as needed
+                        gltf.scene.scale.set(0.7, 0.7, 0.7); // Adjust the scale as needed
 
                         // Set position and rotation
                         const position = positions[i];
@@ -107,18 +84,11 @@ class Gift {
         gift.traverse((child) => {
             if (child.isMesh) {
                 if (child.material === child.userData.originalMaterial) {
+                    const toonShader = createToonShader();
                     child.material = new THREE.ShaderMaterial({
-                        vertexShader: GhibliShader.vertexShader,
-                        fragmentShader: GhibliShader.fragmentShader,
-                        uniforms: {
-                            ...THREE.UniformsUtils.clone(GhibliShader.uniforms),
-                            colorMap: {
-                                value: [
-                                    new THREE.Color("#006400"), // Deep green
-                                    new THREE.Color("#FFFFFF")  // White
-                                ],
-                            },
-                        },
+                        vertexShader: toonShader.vertexShader,
+                        fragmentShader: toonShader.fragmentShader,
+                        uniforms: THREE.UniformsUtils.clone(toonShader.uniforms),
                     });
                 } else {
                     child.material = child.userData.originalMaterial;

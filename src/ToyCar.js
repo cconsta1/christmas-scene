@@ -16,9 +16,9 @@ class ToyCar {
             const gltfLoader = new GLTFLoader();
 
             const positions = [
-                { x: 0, z: 2 }, // In front of the tree
-                { x: 0, z: -2 }, // Behind the tree
-                { x: 2, z: 0 } // To the side of the tree
+                { x: 0, z: 1.9 }, // In front of the tree
+                { x: 0, z: -1.9 }, // Behind the tree
+                { x: 1.9, z: 0 } // To the side of the tree
             ];
 
             let loadedCount = 0;
@@ -28,7 +28,7 @@ class ToyCar {
                 (gltf) => {
                     for (let i = 0; i < positions.length; i++) {
                         const carClone = gltf.scene.clone();
-                        carClone.scale.set(0.5, 0.5, 0.5); // Adjust the scale as needed
+                        carClone.scale.set(0.36, 0.36, 0.36); // Adjust the scale as needed
 
                         // Set position and rotation
                         const position = positions[i];

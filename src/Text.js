@@ -18,7 +18,7 @@ class Text {
                 // Create the text geometry
                 const textGeometry = new TextGeometry('Merry Christmas', {
                     font: font,
-                    size: 0.5,
+                    size: 0.3,
                     depth: 0.2, // Use .depth instead of .height
                     curveSegments: 12,
                     bevelEnabled: true,

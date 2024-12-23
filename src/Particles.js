@@ -10,7 +10,7 @@ class Particles {
 
     load() {
         return new Promise((resolve) => {
-            const particleCount = 50000;
+            const particleCount = 100000;
 
             // Create geometry and positions for the particle system
             const particles = new THREE.BufferGeometry();

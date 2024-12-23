@@ -12,7 +12,6 @@ import Floor from './Floor.js';
 import Skybox from './Skybox.js';
 import Particles from './Particles.js';
 import Text from './Text.js';
-import AnimatedLights from './AnimatedLights.js';
 
 class App {
     constructor() {
@@ -45,7 +44,6 @@ class App {
         this.skybox = new Skybox(this.scene);
         this.particles = new Particles(this.scene);
         this.text = new Text(this.scene);
-        this.animatedLights = new AnimatedLights(this.scene);
         this.loadAssets().then(() => {
             this.onAssetsLoaded();
         });
@@ -108,8 +106,7 @@ class App {
             this.floor.load(),
             this.skybox.load(),
             this.particles.load(),
-            this.text.load(),
-            this.animatedLights.load()
+            this.text.load()
         ]);
     }
 
@@ -217,10 +214,6 @@ class App {
 
         if (this.particles) {
             this.particles.update(deltaTime);
-        }
-
-        if (this.animatedLights) {
-            this.animatedLights.update(elapsedTime);
         }
 
         this.controls.update();

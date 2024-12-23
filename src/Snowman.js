@@ -14,10 +14,11 @@ class Snowman {
         return new Promise((resolve, reject) => {
             const gltfLoader = new GLTFLoader();
 
+            // New positions closer to the tree and around it
             const positions = [
-                { x: -3.3, z: 3.3 }, // Position 1
-                { x: 3.3, z: -3.3 }, // Position 2
-                { x: -3.3, z: -3.3 } // Position 3
+                { x: -1.5, z: 1.5 }, // Position 1
+                { x: 1.5, z: -1.5 }, // Position 2
+                { x: -1.5, z: -1.5 } // Position 3
             ];
 
             let loadedCount = 0;
@@ -26,7 +27,7 @@ class Snowman {
                 gltfLoader.load(
                     '/models/snowman/snow_man.glb',
                     (gltf) => {
-                        gltf.scene.scale.set(0.1, 0.1, 0.1); // Adjust the scale as needed
+                        gltf.scene.scale.set(0.15, 0.15, 0.15); // Adjust the scale as needed
 
                         // Set position and rotation
                         const position = positions[i];

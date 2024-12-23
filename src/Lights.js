@@ -10,6 +10,9 @@ class Lights {
             const ambientLight = new THREE.AmbientLight(0x404040, 5); // Soft white light with high intensity
             this.scene.add(ambientLight);
 
+            const brightAmbientLight = new THREE.AmbientLight(0xffffff, 2); // Bright ambient light in the center
+            this.scene.add(brightAmbientLight);
+
             const positions = [
                 { x: 5, y: 10, z: 7.5 },
                 { x: -5, y: 10, z: 7.5 },
