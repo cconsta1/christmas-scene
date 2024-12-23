@@ -14,11 +14,10 @@ class ToyCar {
     load() {
         return new Promise((resolve, reject) => {
             const gltfLoader = new GLTFLoader();
-
             const positions = [
-                { x: 0, z: 1.9 }, // In front of the tree
-                { x: 0, z: -1.9 }, // Behind the tree
-                { x: 1.9, z: 0 } // To the side of the tree
+                { x: 0, z: 1.9 },
+                { x: 0, z: -1.9 },
+                { x: 1.9, z: 0 }
             ];
 
             let loadedCount = 0;
@@ -28,30 +27,32 @@ class ToyCar {
                 (gltf) => {
                     for (let i = 0; i < positions.length; i++) {
                         const carClone = gltf.scene.clone();
-                        carClone.scale.set(0.36, 0.36, 0.36); // Adjust the scale as needed
+                        carClone.scale.set(0.36, 0.36, 0.36);
 
-                        // Set position and rotation
                         const position = positions[i];
                         carClone.position.set(position.x, 0, position.z);
-                        carClone.rotation.y = Math.random() * Math.PI * 2; // Random rotation
+                        carClone.rotation.y = Math.random() * Math.PI * 2;
 
                         this.scene.add(carClone);
 
-                        // Animation
                         const mixer = new THREE.AnimationMixer(carClone);
                         let action = null;
                         if (gltf.animations.length > 0) {
                             action = mixer.clipAction(gltf.animations[0]);
-                            action.paused = true; // Start with the animation paused
-                            action.loop = THREE.LoopOnce; // Play the animation only once
-                            action.clampWhenFinished = true; // Keep the last frame when finished
+                            action.paused = true;
+                            action.loop = THREE.LoopOnce;
+                            action.clampWhenFinished = true;
                         }
 
-                        this.cars.push({ scene: carClone, mixer: mixer, action: action });
+                        this.cars.push({
+                            scene: carClone,
+                            mixer: mixer,
+                            action: action,
+                            isAnimating: false // Add animation state flag
+                        });
 
                         loadedCount++;
                         if (loadedCount === positions.length) {
-                            // Resolve the promise after all car models are cloned
                             resolve();
                         }
                     }
@@ -63,7 +64,6 @@ class ToyCar {
                 }
             );
 
-            // Add event listener for clicks
             this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
         });
     }
@@ -78,15 +78,23 @@ class ToyCar {
 
         for (const car of this.cars) {
             const intersects = raycaster.intersectObject(car.scene, true);
-            if (intersects.length > 0) {
+            if (intersects.length > 0 && !car.isAnimating) { // Only trigger if not animating
                 this.onCarClick(car);
                 break;
             }
         }
     }
 
+
+
+
     playCarAnimation(car) {
         if (car.action) {
+            if (car.action.isRunning()) {
+                console.log('Animation already playing for car:', car);
+                return; // Do nothing if the animation is already running
+            }
+
             console.log('Playing animation for car:', car);
             car.action.reset(); // Reset the animation to the start
             car.action.paused = false;
@@ -95,6 +103,10 @@ class ToyCar {
             console.log('No animation action found for car:', car);
         }
     }
+
+
+
+
 
     toggleLights() {
         // Maybe in the future
@@ -109,8 +121,7 @@ class ToyCar {
     }
 
     getCarMeshes() {
-        const carMeshes = this.cars.map(car => car.scene);
-        return carMeshes;
+        return this.cars.map(car => car.scene);
     }
 
     getCarByMesh(mesh) {
