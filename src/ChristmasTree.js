@@ -60,7 +60,7 @@ class ChristmasTree {
 
         this.sound = new THREE.Audio(listener);
         const audioLoader = new THREE.AudioLoader();
-        audioLoader.load('audio/The_Waitresses_Christmas_Wrapping.mp3', (buffer) => {
+        audioLoader.load('audio/Happy_Little_Elves_Audionautix.mp3', (buffer) => {
             this.sound.setBuffer(buffer);
             this.sound.setLoop(true);
             this.sound.setVolume(0.5);
