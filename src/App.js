@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import GUI from 'lil-gui';
 import Santa from './Santa.js';
 import Lights from './Lights.js';
 import Snowman from './Snowman.js';
@@ -20,7 +19,6 @@ class App {
         }
         App.instance = this;
 
-        this.gui = new GUI();
         this.canvas = document.querySelector('canvas.webgl');
         this.scene = new THREE.Scene();
         this.sizes = {
@@ -74,9 +72,13 @@ class App {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0.75, 0);
         this.controls.enableDamping = true;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = 10;
+        this.controls.minDistance = 5;
+        this.controls.maxDistance = 10; // Ensure the camera doesn't get outside the skybox
         this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.minAzimuthAngle = -Math.PI / 2; // Set the min azimuthal angle
+        this.controls.maxAzimuthAngle = Math.PI / 2; // Set the max azimuthal angle
+        this.controls.dampingFactor = 0.1;
+        this.controls.enablePan = false;
     }
 
     initEventListeners() {

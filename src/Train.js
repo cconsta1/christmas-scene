@@ -30,7 +30,7 @@ class Train {
         this.scene = scene;
         this.mixer = null;
         this.train = null;
-        this.radius = 3.8;
+        this.radius = 4.4;
         this.isAnimating = false; // Set to false to start static
         this.isLit = false;
         this.elapsedTime = 0;
@@ -48,7 +48,7 @@ class Train {
             gltfLoader.load(
                 '/models/train/back_to_the_future_train_-_steam_locomotive.glb',
                 (gltf) => {
-                    gltf.scene.scale.set(0.3, 0.3, 0.3);
+                    gltf.scene.scale.set(0.42, 0.42, 0.42);
                     this.scene.add(gltf.scene);
 
                     this.train = gltf.scene;
@@ -126,7 +126,7 @@ class Train {
     move(deltaTime) {
         if (this.train && this.isAnimating) {
             this.elapsedTime += deltaTime;
-            const angle = this.elapsedTime * 0.60;
+            const angle = this.elapsedTime * 0.70;
             this.train.position.x = this.radius * Math.cos(angle);
             this.train.position.z = this.radius * Math.sin(angle);
             this.train.rotation.y = -angle - Math.PI / 2;

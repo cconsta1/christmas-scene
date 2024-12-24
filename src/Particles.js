@@ -10,7 +10,7 @@ class Particles {
 
     load() {
         return new Promise((resolve) => {
-            const particleCount = 100000;
+            const particleCount = 150000;
 
             // Create geometry and positions for the particle system
             const particles = new THREE.BufferGeometry();
@@ -48,8 +48,8 @@ class Particles {
         const positions = this.particleSystem.geometry.attributes.position.array;
         for (let i = 0; i < positions.length / 3; i++) {
             positions[i * 3 + 1] -= deltaTime * 0.5;
-            if (positions[i * 3 + 1] < 0) {
-                positions[i * 3 + 1] = 20;
+            if (positions[i * 3 + 1] < -5) {
+                positions[i * 3 + 1] = 15;
             }
         }
         this.particleSystem.geometry.attributes.position.needsUpdate = true;

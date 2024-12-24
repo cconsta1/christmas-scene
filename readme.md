@@ -39,7 +39,7 @@ Run the following commands:
 
 ## Usage
 - **Interactive Controls**: Use the mouse to orbit around the scene.
-- **Toggle Animation**: Click on the Christmas tree to toggle the train and tree animations.
+- **Toggle Animation**: Click on an asset to reveal an animation.
 - **Audio**: The scene includes background music that plays when the tree is clicked.
 
 ## Using `script.js` Without a Loading Screen

@@ -8,7 +8,8 @@ class Skybox {
 
     load() {
         return new Promise((resolve) => {
-            const skyboxGeometry = new THREE.BoxGeometry(50, 50, 50); // Adjusted size
+            const skyboxSize = 20;  
+            const skyboxGeometry = new THREE.BoxGeometry(skyboxSize, skyboxSize, skyboxSize);
             const skyboxMaterial = new THREE.ShaderMaterial({
                 vertexShader: SkyboxShader.vertexShader,
                 fragmentShader: SkyboxShader.fragmentShader,

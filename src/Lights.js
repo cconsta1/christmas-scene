@@ -10,7 +10,7 @@ class Lights {
             const ambientLight = new THREE.AmbientLight(0x404040, 5); // Soft white light with high intensity
             this.scene.add(ambientLight);
 
-            const brightAmbientLight = new THREE.AmbientLight(0xffffff, 2); // Bright ambient light in the center
+            const brightAmbientLight = new THREE.AmbientLight(0xffffff, 3); // Bright ambient light in the center
             this.scene.add(brightAmbientLight);
 
             const positions = [
@@ -21,7 +21,7 @@ class Lights {
             ];
 
             positions.forEach(position => {
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1.3);
                 directionalLight.position.set(position.x, position.y, position.z);
                 directionalLight.castShadow = true;
                 directionalLight.shadow.camera.near = 0.1;

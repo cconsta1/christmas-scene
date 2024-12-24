@@ -10,7 +10,8 @@ class Floor {
     load() {
         return new Promise((resolve) => {
             // Create the box geometry for the platform with a thinner height
-            const floorGeometry = new THREE.BoxGeometry(10, 0.2, 10);
+            const floorSize = 20; // Match the skybox size
+            const floorGeometry = new THREE.BoxGeometry(floorSize, 0.2, floorSize);
 
             // Create the material using the SnowShader
             const floorMaterial = new ShaderMaterial({

@@ -8,6 +8,7 @@ class Santa {
         this.renderer = renderer;
         this.santa = null;
         this.mixer = null;
+        this.pointLight = null;
     }
 
     load() {
@@ -21,7 +22,6 @@ class Santa {
 
                     // Set position and rotation
                     gltf.scene.position.set(2.5, 0.1, 1.2); // Move Santa out of the way
-                    //gltf.scene.rotation.y = Math.random() * Math.PI * 2; // Random rotation
 
                     this.scene.add(gltf.scene);
 
@@ -68,10 +68,17 @@ class Santa {
     lightUp() {
         this.santa.traverse((child) => {
             if (child.isMesh) {
-                child.material.emissive.setHex(0xff0000); // Set emissive color to red
-                child.material.emissiveIntensity = 1; // Increase emissive intensity
+                child.material.emissive.setHex(0x0000ff); // Set emissive color to blue
+                child.material.emissiveIntensity = 2; // Increase emissive intensity
             }
         });
+
+        // Add a point light to illuminate Santa
+        if (!this.pointLight) {
+            this.pointLight = new THREE.PointLight(0x0000ff, 2, 50);
+            this.pointLight.position.set(this.santa.position.x, this.santa.position.y + 5, this.santa.position.z);
+            this.scene.add(this.pointLight);
+        }
 
         setTimeout(() => {
             this.santa.traverse((child) => {
@@ -80,6 +87,12 @@ class Santa {
                     child.material.emissiveIntensity = 0; // Reset emissive intensity
                 }
             });
+
+            // Remove the point light
+            if (this.pointLight) {
+                this.scene.remove(this.pointLight);
+                this.pointLight = null;
+            }
         }, 1000); // Reset after 1 second
     }
 
