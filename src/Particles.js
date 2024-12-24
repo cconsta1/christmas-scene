@@ -10,7 +10,7 @@ class Particles {
 
     load() {
         return new Promise((resolve) => {
-            const particleCount = 150000;
+            const particleCount = 100000;
 
             // Create geometry and positions for the particle system
             const particles = new THREE.BufferGeometry();
@@ -28,7 +28,7 @@ class Particles {
                 fragmentShader: SnowParticleShader.fragmentShader,
                 uniforms: {
                     color: { value: new THREE.Color(0xffffff) },
-                    size: { value: 0.1 },
+                    size: { value: 0.04 * window.devicePixelRatio }, // Adjust size based on DPR
                     scale: { value: window.innerHeight / 2 }
                 },
                 transparent: true,
