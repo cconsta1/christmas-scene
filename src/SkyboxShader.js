@@ -2,9 +2,9 @@ import * as THREE from 'three';
 
 export const SkyboxShader = {
   uniforms: {
-    topColor: { value: new THREE.Color(0x87CEEB) }, // Light blue color
-    bottomColor: { value: new THREE.Color(0xFFFFFF) }, // White color
-    offset: { value: 33 },
+    topColor: { value: new THREE.Color(0x000000) }, // Black
+    bottomColor: { value: new THREE.Color(0x0a0e29) }, // Dark Blue
+    offset: { value: 10 },
     exponent: { value: 0.6 }
   },
   vertexShader: /* glsl */ `

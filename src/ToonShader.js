@@ -1,7 +1,15 @@
 import { Color } from 'three';
 
+const PALETTE = [
+  new Color("#ff0000"), // Red
+  new Color("#ffd700"), // Gold
+  new Color("#c0c0c0"), // Silver
+  new Color("#ffffff"), // White
+  new Color("#00ff00"), // Green
+];
+
 function getRandomColor() {
-  return new Color(Math.random(), Math.random(), Math.random());
+  return PALETTE[Math.floor(Math.random() * PALETTE.length)];
 }
 
 export function createToonShader() {

@@ -9,26 +9,37 @@ class Floor {
 
     load() {
         return new Promise((resolve) => {
-            // Create the box geometry for the platform with a thinner height
-            const floorSize = 20; // Match the skybox size
-            const floorGeometry = new THREE.BoxGeometry(floorSize, 0.2, floorSize);
+            // Create a high-resolution plane for realistic snow displacement
+            const floorSize = 40; 
+            const segments = 256;
+            const floorGeometry = new THREE.PlaneGeometry(floorSize, floorSize, segments, segments);
+            
+            // Rotate to be flat on the ground
+            floorGeometry.rotateX(-Math.PI / 2);
 
             // Create the material using the SnowShader
-            const floorMaterial = new ShaderMaterial({
+            this.material = new ShaderMaterial({
                 vertexShader: SnowShader.vertexShader,
                 fragmentShader: SnowShader.fragmentShader,
-                uniforms: THREE.UniformsUtils.clone(SnowShader.uniforms)
+                uniforms: THREE.UniformsUtils.clone(SnowShader.uniforms),
+                side: THREE.DoubleSide
             });
 
             // Create the mesh
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            const floor = new THREE.Mesh(floorGeometry, this.material);
             floor.receiveShadow = true;
-            floor.position.y = -0.1; // Adjust the position to make it look like a platform
+            floor.position.y = -0.5; // Lower slightly to allow for displacement height
             this.scene.add(floor);
 
             console.log('Floor loaded');
             resolve();
         });
+    }
+
+    update(camera) {
+        if (this.material) {
+            this.material.uniforms.viewVector.value.copy(camera.position);
+        }
     }
 }
 

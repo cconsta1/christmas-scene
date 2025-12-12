@@ -13,7 +13,7 @@ export const StarShader = {
     brightnessThresholds: {
       value: [0.9, 0.45, 0.001],
     },
-    lightPosition: { value: new Vector3(15, 15, 15) },
+    lightPosition: { value: new Vector3(5, 10, 5) },
   },
   vertexShader: /* glsl */ `
     precision highp float;

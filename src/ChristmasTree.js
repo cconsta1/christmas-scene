@@ -13,8 +13,6 @@ class ChristmasTree {
         this.mixer = null;
         this.tree = null;
         this.isAnimating = false;
-
-        this.initAudio();
     }
 
     load() {
@@ -37,10 +35,9 @@ class ChristmasTree {
                     this.mixer = new THREE.AnimationMixer(gltf.scene);
                     if (gltf.animations.length > 0) {
                         this.action = this.mixer.clipAction(gltf.animations[0]);
-                        this.action.paused = true;
+                        // Play animation if it exists, but keep it subtle or just let it be
+                        // this.action.play(); 
                     }
-
-                    this.renderer.domElement.addEventListener('click', this.onClick.bind(this));
 
                     // Resolve the promise after the tree model is loaded
                     resolve();
@@ -89,35 +86,6 @@ class ChristmasTree {
                 }
             }
         });
-    }
-
-    onClick(event) {
-        const mouse = new THREE.Vector2();
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, this.camera);
-
-        const intersects = raycaster.intersectObject(this.tree, true);
-        if (intersects.length > 0) {
-            this.toggleAnimation();
-            if (this.sound.isPlaying) {
-                this.sound.pause();
-            } else {
-                this.sound.play();
-            }
-        }
-    }
-
-    toggleAnimation() {
-        this.isAnimating = !this.isAnimating;
-        if (this.isAnimating) {
-            this.action.paused = false;
-            this.action.play();
-        } else {
-            this.action.paused = true;
-        }
     }
 
     update(deltaTime) {
