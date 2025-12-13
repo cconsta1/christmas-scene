@@ -11,6 +11,7 @@ import Floor from './Floor.js';
 import Skybox from './Skybox.js';
 import Particles from './Particles.js';
 import Fireflies from './Fireflies.js';
+import Text from './Text.js';
 
 class App {
     constructor() {
@@ -42,6 +43,7 @@ class App {
         this.skybox = new Skybox(this.scene);
         this.particles = new Particles(this.scene);
         this.fireflies = new Fireflies(this.scene);
+        this.text = new Text(this.scene);
         
         this.loadAssets().then(() => {
             this.onAssetsLoaded();
@@ -160,7 +162,8 @@ class App {
             this.floor.load(),
             this.skybox.load(),
             this.particles.load(),
-            this.fireflies.load()
+            this.fireflies.load(),
+            this.text.load()
         ]);
     }
 
@@ -171,11 +174,14 @@ class App {
 
     animate() {
         const elapsedTime = this.clock.getElapsedTime();
-        const deltaTime = elapsedTime - this.previousTime;
+        let deltaTime = elapsedTime - this.previousTime;
         this.previousTime = elapsedTime;
 
+        // Cap deltaTime to prevent huge jumps (e.g. when tab is inactive)
+        if (deltaTime > 0.1) deltaTime = 0.1;
+
         if (this.gift) {
-            this.gift.update(deltaTime);
+            this.gift.update(deltaTime, elapsedTime);
         }
 
         if (this.christmasTree) {
@@ -192,6 +198,10 @@ class App {
 
         if (this.floor) {
             this.floor.update(this.camera);
+        }
+
+        if (this.text) {
+            this.text.update(elapsedTime);
         }
 
         this.controls.update();

@@ -1,73 +1,66 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ShaderMaterial } from 'three';
-import { createToonShader } from './ToonShader.js';
+import { GiftShader } from './GiftShader.js';
 
 class Gift {
     constructor(scene, camera, renderer) {
         this.scene = scene;
-        this.camera = camera;
-        this.renderer = renderer;
         this.gifts = [];
     }
 
     load() {
-        return new Promise((resolve, reject) => {
-            const gltfLoader = new GLTFLoader();
-
-            const positions = [
-                { x: -2, z: 2 }, // Position 1: Behind the tree
-                { x: -2, z: -2 }, // Position 2: Behind the tree
-                { x: 2, z: 2.2 } // Position 3: In front of the tree
+        return new Promise((resolve) => {
+            const giftGeometry = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+            
+            // Define some nice color palettes
+            const palettes = [
+                { base: 0xcc0000, ribbon: 0xffd700 }, // Red & Gold
+                { base: 0x006600, ribbon: 0xffffff }, // Green & White
+                { base: 0x0000cc, ribbon: 0xc0c0c0 }, // Blue & Silver
+                { base: 0x800080, ribbon: 0xffd700 }, // Purple & Gold
+                { base: 0xffffff, ribbon: 0xcc0000 }, // White & Red
             ];
 
-            let loadedCount = 0;
+            const positions = [
+                { x: -2.5, z: 2, r: 0.2 },
+                { x: -1.8, z: -2, r: -0.5 },
+                { x: 2.2, z: 2.2, r: 0.8 },
+                { x: 1.5, z: -1.5, r: -0.2 },
+                { x: 0, z: 2.5, r: 0 }
+            ];
 
-            for (let i = 0; i < positions.length; i++) {
-                gltfLoader.load(
-                    '/models/gifts/simple_presents.glb',
-                    (gltf) => {
-                        gltf.scene.scale.set(0.7, 0.7, 0.7); // Adjust the scale as needed
+            positions.forEach((pos, index) => {
+                const palette = palettes[index % palettes.length];
+                
+                const material = new ShaderMaterial({
+                    vertexShader: GiftShader.vertexShader,
+                    fragmentShader: GiftShader.fragmentShader,
+                    uniforms: THREE.UniformsUtils.clone(GiftShader.uniforms)
+                });
 
-                        // Set position and rotation
-                        const position = positions[i];
-                        gltf.scene.position.set(position.x, 0, position.z);
-                        gltf.scene.rotation.y = 0; // No rotation
+                material.uniforms.uBaseColor.value.setHex(palette.base);
+                material.uniforms.uRibbonColor.value.setHex(palette.ribbon);
 
-                        // Apply Toon Shader to make them pop
-                        gltf.scene.traverse((child) => {
-                            if (child.isMesh) {
-                                const toonShader = createToonShader();
-                                const giftMaterial = new ShaderMaterial({
-                                    vertexShader: toonShader.vertexShader,
-                                    fragmentShader: toonShader.fragmentShader,
-                                    uniforms: THREE.UniformsUtils.clone(toonShader.uniforms)
-                                });
-                                child.material = giftMaterial;
-                            }
-                        });
+                const mesh = new THREE.Mesh(giftGeometry, material);
+                mesh.position.set(pos.x, 0.3, pos.z); // Half height
+                mesh.rotation.y = pos.r;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
 
-                        this.scene.add(gltf.scene);
-                        this.gifts.push(gltf.scene);
+                this.scene.add(mesh);
+                this.gifts.push(mesh);
+            });
 
-                        loadedCount++;
-                        if (loadedCount === positions.length) {
-                            // Resolve the promise after all gift models are loaded
-                            resolve();
-                        }
-                    },
-                    undefined,
-                    (error) => {
-                        console.error('An error happened while loading the gift model:', error);
-                        reject(error);
-                    }
-                );
-            }
+            resolve();
         });
     }
 
-    update(deltaTime) {
-        // No need to update anything
+    update(deltaTime, elapsedTime) {
+        this.gifts.forEach(gift => {
+            if (gift.material.uniforms) {
+                gift.material.uniforms.uTime.value = elapsedTime;
+            }
+        });
     }
 }
 
