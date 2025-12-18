@@ -11,7 +11,7 @@ import Floor from './Floor.js';
 import Skybox from './Skybox.js';
 import Particles from './Particles.js';
 import Fireflies from './Fireflies.js';
-import Text from './Text.js';
+import { PopArtShader } from './PopArtShader.js';
 
 class App {
     constructor() {
@@ -22,8 +22,8 @@ class App {
 
         this.canvas = document.querySelector('canvas.webgl');
         this.scene = new THREE.Scene();
-        // Add fog for atmosphere
-        this.scene.fog = new THREE.FogExp2(0x050510, 0.025);
+        // Add fog for atmosphere (deep indigo negative space)
+        this.scene.fog = new THREE.FogExp2(0x06061b, 0.028);
         
         this.sizes = {
             width: window.innerWidth,
@@ -43,7 +43,7 @@ class App {
         this.skybox = new Skybox(this.scene);
         this.particles = new Particles(this.scene);
         this.fireflies = new Fireflies(this.scene);
-        this.text = new Text(this.scene);
+        this.popArtPass = null;
         
         this.loadAssets().then(() => {
             this.onAssetsLoaded();
@@ -74,7 +74,7 @@ class App {
         
         // Tone mapping for better lighting
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.2;
+        this.renderer.toneMappingExposure = 1.35;
     }
 
     initPostProcessing() {
@@ -83,15 +83,20 @@ class App {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
 
+        // Pop-art stylization pass (posterize + halftone + slight RGB split)
+        this.popArtPass = new ShaderPass(PopArtShader);
+        this.popArtPass.material.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+        this.composer.addPass(this.popArtPass);
+
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             1.5, // strength
             0.4, // radius
             0.85 // threshold
         );
-        bloomPass.strength = 0.5; // Reduced strength
-        bloomPass.radius = 0.3; // Reduced radius for sharper glow
-        bloomPass.threshold = 0.85; // Only very bright things glow
+        bloomPass.strength = 0.75; // Stronger bulb glow
+        bloomPass.radius = 0.28; // Still fairly tight
+        bloomPass.threshold = 0.78; // Catch emissive bulbs a bit more
         
         this.composer.addPass(bloomPass);
 
@@ -151,6 +156,10 @@ class App {
             
             this.composer.setSize(this.sizes.width, this.sizes.height);
             this.composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            if (this.popArtPass?.material?.uniforms?.uResolution) {
+                this.popArtPass.material.uniforms.uResolution.value.set(this.sizes.width, this.sizes.height);
+            }
         });
     }
 
@@ -162,8 +171,7 @@ class App {
             this.floor.load(),
             this.skybox.load(),
             this.particles.load(),
-            this.fireflies.load(),
-            this.text.load()
+            this.fireflies.load()
         ]);
     }
 
@@ -200,8 +208,8 @@ class App {
             this.floor.update(this.camera);
         }
 
-        if (this.text) {
-            this.text.update(elapsedTime);
+        if (this.popArtPass?.material?.uniforms?.uTime) {
+            this.popArtPass.material.uniforms.uTime.value = elapsedTime;
         }
 
         this.controls.update();

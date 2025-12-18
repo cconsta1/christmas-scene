@@ -4,14 +4,14 @@ export const StarShader = {
   uniforms: {
     colorMap: {
       value: [
-        new Color("#FFFF00"), // Bright yellow
-        new Color("#FFD700"), // Gold
-        new Color("#FFA500"), // Orange
-        new Color("#FF8C00"), // Dark orange
+        new Color("#ffd400"), // Sunflower yellow
+        new Color("#ffcf2e"), // warm highlight
+        new Color("#e6b800"), // mid
+        new Color("#b88f00"), // shadow
       ],
     },
     brightnessThresholds: {
-      value: [0.9, 0.45, 0.001],
+      value: [0.72, 0.34, 0.08],
     },
     lightPosition: { value: new Vector3(5, 10, 5) },
   },

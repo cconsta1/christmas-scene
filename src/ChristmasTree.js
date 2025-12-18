@@ -73,9 +73,30 @@ class ChristmasTree {
 
         object.traverse((child) => {
             if (child.isMesh) {
-                if (child.name === 'model_default_0') {
-                    child.material = treeShaderMaterial;
-                } else if (child.name.startsWith('Sphere')) {
+                // Default everything to pine-green tree shading
+                child.material = treeShaderMaterial;
+
+                // Try to detect ornament meshes robustly (names vary across exports)
+                const name = (child.name || '').toLowerCase();
+                let maxDim = Infinity;
+
+                if (child.geometry) {
+                    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+                    if (child.geometry.boundingBox) {
+                        const size = new THREE.Vector3();
+                        child.geometry.boundingBox.getSize(size);
+                        maxDim = Math.max(size.x, size.y, size.z);
+                    }
+                }
+
+                const isOrnament =
+                    name.startsWith('sphere') ||
+                    name.includes('ornament') ||
+                    name.includes('bauble') ||
+                    name.includes('ball') ||
+                    maxDim < 0.35;
+
+                if (isOrnament) {
                     const toonShader = createToonShader();
                     const decorationShaderMaterial = new ShaderMaterial({
                         vertexShader: toonShader.vertexShader,

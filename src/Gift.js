@@ -12,13 +12,13 @@ class Gift {
         return new Promise((resolve) => {
             const giftGeometry = new THREE.BoxGeometry(0.6, 0.6, 0.6);
             
-            // Define some nice color palettes
+            // Controlled comic palettes (flat primaries + mint)
             const palettes = [
-                { base: 0xcc0000, ribbon: 0xffd700 }, // Red & Gold
-                { base: 0x006600, ribbon: 0xffffff }, // Green & White
-                { base: 0x0000cc, ribbon: 0xc0c0c0 }, // Blue & Silver
-                { base: 0x800080, ribbon: 0xffd700 }, // Purple & Gold
-                { base: 0xffffff, ribbon: 0xcc0000 }, // White & Red
+                { base: 0xe10600, ribbon: 0xffd400 }, // red + yellow
+                { base: 0x0047ff, ribbon: 0xffffff }, // blue + white
+                { base: 0xffd400, ribbon: 0x0047ff }, // yellow + blue
+                { base: 0xb8f4d6, ribbon: 0xe10600 }, // mint + red
+                { base: 0xffffff, ribbon: 0xe10600 }, // white + red
             ];
 
             const positions = [

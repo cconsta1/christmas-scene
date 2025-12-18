@@ -7,12 +7,12 @@ class Lights {
 
     load() {
         return new Promise((resolve) => {
-            // Ambient light - Cool blue night tint
-            const ambientLight = new THREE.AmbientLight(0x1a234d, 0.5);
+            // Ambient light - deep indigo wash
+            const ambientLight = new THREE.AmbientLight(0x0b1030, 0.35);
             this.scene.add(ambientLight);
 
-            // Moonlight - Directional light with shadows
-            const moonLight = new THREE.DirectionalLight(0xcceeff, 1.5);
+            // Moonlight - cool key light
+            const moonLight = new THREE.DirectionalLight(0xd7e4ff, 1.05);
             moonLight.position.set(5, 10, 5);
             moonLight.castShadow = true;
             
@@ -29,13 +29,13 @@ class Lights {
             
             this.scene.add(moonLight);
 
-            // Warm glow from the tree area
-            const treeLight = new THREE.PointLight(0xffaa33, 2, 10);
+            // Subtle tree fill (kept neutral so palette stays controlled)
+            const treeLight = new THREE.PointLight(0xffffff, 1.25, 9);
             treeLight.position.set(0, 2, 0);
             this.scene.add(treeLight);
 
-            // Backlight/Rim light for separation
-            const rimLight = new THREE.SpotLight(0x4d66cc, 2);
+            // Backlight/Rim light for separation (indigo)
+            const rimLight = new THREE.SpotLight(0x2b2f6f, 1.6);
             rimLight.position.set(-5, 5, -5);
             rimLight.lookAt(0, 0, 0);
             this.scene.add(rimLight);

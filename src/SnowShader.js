@@ -2,7 +2,7 @@ import { Color, Vector3 } from 'three';
 
 export const SnowShader = {
   uniforms: {
-    color: { value: new Color("#dbeeff") }, // Cool white/blue snow
+    color: { value: new Color("#f4c6b8") }, // Pale peach pastel
     lightPosition: { value: new Color("#F5F5F5") }, // Light Gray
     viewVector: { value: new Vector3() }
   },
@@ -31,7 +31,7 @@ export const SnowShader = {
     float fbm(vec2 p) {
         float v = 0.0;
         float a = 0.5;
-        for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 3; i++) {
             v += a * noise(p);
             p *= 2.0;
             a *= 0.5;
@@ -43,9 +43,9 @@ export const SnowShader = {
       vNormal = normal;
       vPosition = position;
       
-      // Calculate displacement
-      float displacement = fbm(position.xz * 0.5) * 1.5; // Large drifts
-      displacement += fbm(position.xz * 2.0) * 0.2; // Small details
+      // Calculate displacement (reduced for flatter poster read)
+      float displacement = fbm(position.xz * 0.28) * 1.10; // larger chunky forms
+      displacement += fbm(position.xz * 1.05) * 0.07; // reduced small detail
       
       // Flatten the center area for the tree and gifts
       float dist = length(position.xz);
@@ -72,9 +72,8 @@ export const SnowShader = {
     varying vec3 vWorldPosition;
     varying float vDisplacement;
 
-    // Simple pseudo-random function
-    float random(vec2 st) {
-        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
     }
 
     void main() {
@@ -87,37 +86,22 @@ export const SnowShader = {
       vec3 lightDir = normalize(vec3(0.5, 1.0, 0.5));
       float brightness = max(0.0, dot(normal, lightDir));
       
-      // Ambient occlusion based on displacement (valleys are darker)
-      float ao = smoothstep(-0.5, 1.0, vDisplacement);
+        // Matte toon banding (2-band)
+        float band = step(0.55, brightness);
+        vec3 shadowColor = color * vec3(0.85, 0.78, 0.80);
+        vec3 highlightColor = color * vec3(1.04, 1.01, 0.98);
+        vec3 finalColor = mix(shadowColor, highlightColor, band);
 
-      // Sparkles
-      vec3 viewDir = normalize(viewVector - vWorldPosition);
-      
-      // Create a grid for sparkles
-      float scale = 30.0; 
-      vec2 grid = floor(vWorldPosition.xz * scale);
-      float noise = random(grid);
-      
-      // View dependent sparkle intensity
-      float sparkle = 0.0;
-      if (noise > 0.92) { 
-          vec3 sparkleDir = normalize(vec3(random(grid), 1.0, random(grid + 1.0)));
-          float spec = max(0.0, dot(reflect(-viewDir, normal), sparkleDir));
-          sparkle = pow(spec, 30.0) * 2.5; 
-      }
-
-      // Color variation: Blueish shadows, warm highlights
-      vec3 shadowColor = vec3(0.7, 0.8, 0.95) * color;
-      vec3 highlightColor = vec3(1.0, 1.0, 0.95) * color;
-      
-      vec3 finalColor = mix(shadowColor, highlightColor, brightness);
-      finalColor *= (0.8 + 0.2 * ao); // Apply AO
-      finalColor += vec3(sparkle);
+        // Intentional sparkle: very sparse screen-print specks
+        vec2 cell = floor(vWorldPosition.xz * 3.0);
+        float n = hash(cell);
+        float speck = step(0.996, n) * (0.05 + 0.08 * band);
+        finalColor += vec3(1.0) * speck;
 
       // Distance fog (simple fade to black/background at edges)
       float dist = length(vWorldPosition.xz);
       float fogFactor = smoothstep(15.0, 20.0, dist);
-      finalColor = mix(finalColor, vec3(0.02, 0.02, 0.06), fogFactor); // Fade to dark blue
+      finalColor = mix(finalColor, vec3(0.04, 0.04, 0.12), fogFactor); // Fade to deep indigo
 
       gl_FragColor = vec4(finalColor, 1.0);
     }`,
